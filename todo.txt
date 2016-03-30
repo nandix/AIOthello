@@ -1,0 +1,6 @@
+Init:
+- run from command line, etc.
+- print puzzle in correct format
+
+Generate Successors:
+- Look at Weiss's Minimax code to see what it takes

@@ -4,3 +4,11 @@ Init:
 
 Generate Successors:
 - Look at Weiss's Minimax code to see what it takes
+
+
+Notes:
+
+For evaluation we should consider:
+- looking at standard openings (like they have in chess)
+- control corners - good!
+- control an edge - good thing too

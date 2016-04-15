@@ -10,11 +10,11 @@
 ;
 ; Return:       none
 ;------------------------------------------------------------------------------
-(defun printBoard (boardList)
+(defun printBoard ()
 
 	(let 
 		(
-			(splitBoard (splitBoardList boardList '8))
+			(splitBoard (splitBoardList *printBoard* '8))
 			(rowIndex '1)
 		)
 		; Print the header to the terminal

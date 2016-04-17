@@ -24,7 +24,12 @@ Notes:
 
 (setf test-position '(- - - - - - - - - - - - - - - - - - - - - - - - - - - w b - - - - - - b w - - - - - - - - - - - - - - - - - - - - - - - - - - -))
 
-(setf test-player 'b)
+(setf test-position2 '(- - - - - - - - - - - - - - - - - - - - - - - - - - b b b - - - - - - b w - - - - - - - - - - - - - - - - - - - - - - - - - - -))
+
+(setf test-position3 '(- - - - - - - - - - - - - - - - - - W - - - - - - - B W B - - - - - - B W - - - - - - - - - - - - - - - - - - - - - - - - - - -) )
+
+(setf test-player-b 'b)
+(setf test-player-w 'w)
 
 (defun move-generator (position player)
 	(do*
@@ -66,19 +71,40 @@ Notes:
 			(equal (nth check_pos position) oppose)
 			(> (mod play_pos 8) 0) )
 
-			(setf left (board-generate position check_pos player) ) 
-
+			; search for edge of board or until blank space has been found
+			(loop while (/= (mod check_pos 8) 7) do
+				(when (equal (nth check_pos position) '-) 
+					(setf left (board-generate position check_pos player)) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
+				(setf check_pos (+ check_pos -1) ) 
+			)
 			(print 'left)
 		) 
 
 		; check right
 		(setf check_pos (+ play_pos 1) )
-		(when (and (< play_pos 64)
+		(when (and (< play_pos 63)
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose)
 			(< (mod play_pos 8) 7) )
-			(setf right (board-generate position check_pos player) )  
 
+			; search for edge of board or until blank space has been found
+			(loop while (/= (mod check_pos 8) 0) do
+				(when (equal (nth check_pos position) '-) 
+					(setf right (board-generate position check_pos player)) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
+				(setf check_pos (+ check_pos 1) ) 
+			)
 			(print 'right)
 		)
 
@@ -88,8 +114,19 @@ Notes:
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf up (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while (> check_pos -1) do
+				(when (equal (nth check_pos position) '-) 
+					(setf up (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos -8) ) 
+			)
 			(print 'up)
 		)
 
@@ -99,8 +136,19 @@ Notes:
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf down (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while (< check_pos 64) do
+				(when (equal (nth check_pos position) '-) 
+					(setf down (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos 8) ) 
+			)
 			(print 'down)
 		)
 
@@ -111,10 +159,20 @@ Notes:
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf up-left (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while ( and  (> check_pos -1) (/= (mod check_pos 8) 7)) do
+				(when (equal (nth check_pos position) '-) 
+					(setf up-left (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos -9) ) 
+			)
 			(print 'up-left)
-
 		)
 
 		; check up-right
@@ -124,10 +182,20 @@ Notes:
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf up-right (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while ( and (> check_pos 0) (/= (mod check_pos 8) 0)) do
+				(when (equal (nth check_pos position) '-) 
+					(setf up-right (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos -7) ) 
+			)
 			(print 'up-right)
-
 		)
 
 		; check down-left
@@ -137,20 +205,42 @@ Notes:
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf down-left (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while ( and (< check_pos 63) (/= (mod check_pos 8) 7)) do
+				(when (equal (nth check_pos position) '-) 
+					(setf down-left (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos 7) ) 
+			)
 			(print 'down-left)
 		)
 
 		; check down-right
 		(setf check_pos (+ play_pos 9) )
-		(when (and (< play_pos 56)
+		(when (and (< play_pos 55)
 			(< (mod play_pos 8) 8)
 			(equal (nth play_pos position) player)
 			(equal (nth check_pos position) oppose) )
 
-			(setf down-right (board-generate position check_pos player) ) 
+			; search for edge of board or until blank space has been found
+			(loop while ( and (< check_pos 64) (/= (mod check_pos 8) 0)) do
+				(when (equal (nth check_pos position) '-) 
+					(setf down-right (board-generate position check_pos player) ) 
+					(return)
+				)
+				; if player piece has been encountered, stop looking
+				(when (equal (nth check_pos position) player)
+					(return)
+				)
 
+				(setf check_pos (+ check_pos 9) ) 
+			)
 			(print 'down-right)
 		)
 
@@ -179,95 +269,184 @@ Parameters:
 Returns: a list of available moves from the current board state
 
 ***************************************************************************** |# 
-(defun board-generate (position move_pos player)
-	(let
-		(new-board)
-		(setq new-board (copy-list position)) 
-		(setf check_pos 0)
+(defun board-generate (position placed_pos player)
+	(let (
+		(new_board (copy-list position)) 	; copy current board
+		(check_pos 0)			; position on the board to check pieces to flip
+		(check_dir 0)			; direction to check for pieces to flip
+		(flip nil) )		; flag we want to flip, holds position to start flipping
 
-		(setf (nth move_pos new-board) player)	
+		; set oppenent color
+		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
-		; check left
-		(setf check_pos (- move_pos 1) )
-		(when (and (> check_pos 0)
-			(equal (nth check_pos position) oppose)
-			(> (mod check_pos 8) 0) )
+		(setf (nth placed_pos new_board) player)	
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		) 
+		; ********** check left of placed piece ********** 
+		(setf check_dir -1 )
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+		
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					 (print flip) 
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-		; check right
-		(setf check_pos (+ move_pos 1) )
-		(when (and (< check_pos 64)
-			(equal (nth check_pos position) oppose)
-			(< (mod check_pos 8) 7) )
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
+		; ********** check right of placed piece ********** 
+		(setf check_dir 1)
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
 
-		; check up
-		(setf check_pos (- move_pos 8) )
-		(when (and (> check_pos 7)
-			(equal (nth check_pos position) oppose) )
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					(print flip)
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-		; check down 
-		(setf check_pos (+ move_pos 8) )
-		(when (and (< check_pos 56)
-			(equal (nth check_pos position) oppose) )
+		; ********** check up of placed piece ********** 
+		(setf check_dir -8 )
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-		; check up-left 
-		(setf check_pos (- move_pos 9) )
-		(when (and (> check_pos 8) 
-			(> (mod check_pos 8) 0)
-			(equal (nth check_pos position) oppose) )
+		; ********** check down of placed piece ********** 
+		(setf check_dir 8)
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-		; check up-right
-		(setf check_pos (- move_pos 7) )
-		(when (and (> check_pos 8) 
-			(< (mod check_pos 8) 8)
-			(equal (nth check_pos position) oppose) )
+		; ********** check up-left of placed piece ********** 
+		(setf check_dir -9 )
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-		; check down-left
-		(setf check_pos (+ move_pos 7) )
-		(when (and (< check_pos 56)
-			(> (mod check_pos 8) 0)
-			(equal (nth check_pos position) oppose) )
+		; ********** check up-right of placed piece ********** 
+		(setf check_dir -7)
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-		; check down-right
-		(setf check_pos (+ move_pos 9) )
-		(when (and (< check_pos 56)
-			(< (mod check_pos 8) 8)
-			(equal (nth check_pos position) oppose) )
+		; ********** check down-left of placed piece ********** 
+		(setf check_dir 7)
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
 
-			(setf (nth move_pos new-board) player)
-			(setf (nth check_pos new-board) player)
-		)
 
-	new-board
+		; ********** check down-right of placed piece ********** 
+		(setf check_dir 9)
+		(setf flip (check-flip-pieces position placed_pos player check_dir) )
+	
+		; if not nil, then flip
+		(if flip 	(loop while (/= flip placed_pos ) do
+					(setf (nth flip new_board) player)
+					(setf flip (- flip check_dir) )
+					) ; end loop
+		) ;end if, (do nothing if not true)
+
+	new_board
 	); end let
 ) ;end board-generate
 
 
+#| ****************************************************************************
+Function: check-flip-pieces
+
+Author: Stephanie Athow
+
+Description: searches a direction checking if the placed piece will	cause 
+	opponent pieces to flip.
+
+Parameters: 
+	position: a list containing the current board state
+	start_pos: start location of recursion
+	player: the player making a move, will be black ('b) or white ('w)
+	dir: direction to move searching for valid move
+
+Returns: position of valid move or nil
+***************************************************************************** |# 
+(defun check-flip-pieces (position start_pos player dir)
+	(let
+		(check_pos) 		; position to check for flipping
+		(setf start_flip nil) 	; position to return to start flipping
+		
+
+		(setf check_pos (+ start_pos dir))
+
+;		(print 'check_pos)
+;		(print check_pos)
+
+		; set oppenent color
+		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
+
+		; search along direction until:
+		; 	edge of board
+		; 	blank found
+		; 	piece of same color is found
+		(loop while( and (> check_pos -1) 	; check start of board
+					(< check_pos 64)	  	; check end of board
+					(< (mod check_pos 8) 7)	; check start of row
+					(> (mod check_pos 8) 0)	; check end of row
+;					(equal (nth check_pos position) oppose)  ; check oppose color
+			  	    ) do ; end while conditions
+
+;			(print 'check_pos_flip)
+;			(print check_pos)
+;
+			; check to see if it's a blank spot, if yes, return
+			(when (equal (nth check_pos position) '-) 
+				(return)
+			)
+			; check to see if there's a piece the same color as player
+			; if piece is same as player color, flag we want to flip
+			(when (equal (nth check_pos position) player)
+				(setf start_flip (- check_pos dir) )
+;				(print 'start_flip_set)
+;				(print start_flip)
+				(return)
+			) ; end when
+
+			; increment while loop counter
+			(setf check_pos (+ check_pos dir) )
+
+		) ; end while loop
+;		(print 'start_flip)
+;		(print start_flip)
+		start_flip
+	) ; end let
+) ; end check-flip-pieces
 

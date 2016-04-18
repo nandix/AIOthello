@@ -40,6 +40,7 @@ Notes:
 
 			; successors lists
 			(successors nil)
+			(loop_successors nil)
 			(left nil)
 			(right nil)
 			(down nil)
@@ -244,10 +245,21 @@ Notes:
 			(print 'down-right)
 		)
 
-		(setf successors (list left right up down up-left up-right down-left down-right))
 
+		(setf successors (list* left right up down up-left up-right down-left down-right successors) )
 		(setf successors (remove nil successors))
 
+		(setf loop_successors nil)
+		(setf left nil)
+		(setf right nil)
+		(setf down nil)
+		(setf up nil)
+		(setf up-left nil)
+		(setf up-right nil)
+		(setf down-left nil)
+		(setf down-right nil)
+
+		(print 'successors)
 		successors ; return successors
 		(print successors)
 

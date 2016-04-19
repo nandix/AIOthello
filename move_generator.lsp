@@ -1,5 +1,5 @@
-#|
-			***** Move_Generator.lsp *****
+#| ********************* Move_Generator.lsp ***********************************
+
 Function: move-generator 
 Author: Stephanie Athow
 
@@ -20,7 +20,7 @@ Notes:
 		-Pieces are flipped between placed piece and exisiting piece of 
 			player's color. Also check for pieces to be flipped that 
 			connect to other pieces of player's color
-**************************************************************************** |#
+***************************************************************************** |#
 
 (setf test-position '(- - - - - - - - - - - - - - - - - - - - - - - - - - - w b - - - - - - b w - - - - - - - - - - - - - - - - - - - - - - - - - - -))
 
@@ -416,11 +416,7 @@ Returns: position of valid move or nil
 		(check_pos) 		; position to check for flipping
 		(setf start_flip nil) 	; position to return to start flipping
 		
-
 		(setf check_pos (+ start_pos dir))
-
-;		(print 'check_pos)
-;		(print check_pos)
 
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
@@ -436,9 +432,6 @@ Returns: position of valid move or nil
 ;					(equal (nth check_pos position) oppose)  ; check oppose color
 			  	    ) do ; end while conditions
 
-;			(print 'check_pos_flip)
-;			(print check_pos)
-;
 			; check to see if it's a blank spot, if yes, return
 			(when (equal (nth check_pos position) '-) 
 				(return)
@@ -447,8 +440,6 @@ Returns: position of valid move or nil
 			; if piece is same as player color, flag we want to flip
 			(when (equal (nth check_pos position) player)
 				(setf start_flip (- check_pos dir) )
-;				(print 'start_flip_set)
-;				(print start_flip)
 				(return)
 			) ; end when
 
@@ -456,9 +447,59 @@ Returns: position of valid move or nil
 			(setf check_pos (+ check_pos dir) )
 
 		) ; end while loop
-;		(print 'start_flip)
-;		(print start_flip)
 		start_flip
 	) ; end let
 ) ; end check-flip-pieces
+
+#| ****************************************************************************
+Function: validate-move
+
+Author: Stephanie Athow
+
+Description: validates and returns the board state after the user places their piece
+
+Parameters: 
+	Position: a list containing the current board state
+	user_pos: the position to place the current player's piece
+	player: the player making a move, will be black ('b) or white ('w)
+
+Returns: the board state after the user placed their piece or nil if it was 
+	and invalid move.
+
+***************************************************************************** |# 
+(defun validate-move (position user_pos player)
+	(let (
+		(new_board (copy-list position)) 	; copy current board
+		(check_pos 0)			; position on the board to check pieces to flip
+		(check_row 0)
+		(check_col 0)
+		)
+
+		; convert user input to list variable
+		; get user inputs: (row column)
+		(setf check_row (nth 0 user_pos) )
+		(setf check_col (nth 1 user_pos) )
+
+		; account for zero indexing
+		(setf check_row (+ check_row -1) )
+		(setf check_col (+ check_col -1) )
+
+		; convert to a position in our board state list
+		(setf check_pos (+ (* check_row 8) check_col ) )
+
+		(setf new_board (board-generate position check_pos player))
+
+		; check if board is same
+		(if (equal position new_board) (setf new_board nil) new_board)
+
+		; return board-state
+		new-board
+
+	) ; end let
+) ;end validate-move
+
+
+
+
+
 

@@ -14,7 +14,7 @@
 
 	(let 
 		(
-			(splitBoard (splitBoardList *printBoard* '8))
+			(splitBoard (splitBoardList *gameBoard* '8))
 			(rowIndex '1)
 		)
 		; Print the header to the terminal

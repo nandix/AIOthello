@@ -24,8 +24,8 @@
 	; Initialize the game board
 	(othello-init)
 
-	(printBoard 'NIL)
-
+	(printBoard)
+	(make-user-move)
 )
 
 ;------------------------------------------------------------------------------
@@ -67,6 +67,36 @@
 	outflank at least one White stone, or forfeit your move.~%~%" *color* *color*)
 )
 
+;------------------------------------------------------------------------------
+; Function:     make-user-move
+;
+; Author:       Daniel Nix
+;
+; Description:  Prompts a user for a row/col for the next move. Loops until
+;				a valid move has been made
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun make-user-move ()
+
+	(let ((row 'NIL) (col 'NIL) (valid 'NIL))
+		(loop while (not valid)
+
+			(format t "What is your move [row col]? ")
+			(setf row (read))
+			(setf col (read))
+			(setf valid (validate-move *gameBoard* (list row col) *color*) )
+			(if (not valid)
+				(format t "Invalid move, please try again~%")
+			)
+		)
+		(format "Row is: ~d, col: ~d~%" row col)
+		(setf *gameBoard* valid)
+	)
+
+)
 
 
 

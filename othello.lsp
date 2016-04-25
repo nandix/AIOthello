@@ -5,6 +5,7 @@
 (defvar *color* 'black)
 
 (load 'printBoard)
+(load 'move_generator)
 ;------------------------------------------------------------------------------
 ; Function:     othello
 ;
@@ -25,7 +26,18 @@
 	(othello-init)
 
 	(printBoard)
-	(make-user-move)
+
+	(loop while (not (game-is-done)) do
+
+		(format t "Player ~s, your turn!~%" *color*)
+		(make-user-move)
+		(printBoard)
+		(trade-turns)
+	)
+
+	(print-game-stats)
+
+
 )
 
 ;------------------------------------------------------------------------------
@@ -61,6 +73,12 @@
 	(format t "What color would you like to be [black/white]? ")
 	(setf *color* (read))
 
+	;If the color is black, set it to b. Otherwise, set to w.
+	(if (equal *color* 'black)
+		(setf *color* 'b)
+		(setf *color* 'w)
+	)
+
 
 	(format t "OK! You will be playing ~s. When asked for your move, please enter the row~%
 	and column in which you would like to place a ~s stone. Remember, you must~%
@@ -81,8 +99,14 @@
 ;------------------------------------------------------------------------------
 (defun make-user-move ()
 
-	(let ((row 'NIL) (col 'NIL) (valid 'NIL))
-		(loop while (not valid)
+	(let 
+		(
+		(row 'NIL) 
+		(col 'NIL) 
+		(valid 'NIL)
+		)
+
+		(loop while (not valid) do
 
 			(format t "What is your move [row col]? ")
 			(setf row (read))
@@ -92,12 +116,120 @@
 				(format t "Invalid move, please try again~%")
 			)
 		)
-		(format "Row is: ~d, col: ~d~%" row col)
+		(format t "Row is: ~d, col: ~d~%" row col)
 		(setf *gameBoard* valid)
 	)
 
 )
 
+
+;------------------------------------------------------------------------------
+; Function:     game-is-done
+;
+; Author:       Daniel Nix
+;
+; Description:  Checks if the game is over. Returns t if all spaces are filled.
+;				Returns NIL otherwise
+;
+; Parameters:   none
+;
+; Return:       t if board is full, NIL otherwise
+;------------------------------------------------------------------------------
+(defun game-is-done ()
+	(not (member '- *gameBoard*))
+)
+
+
+;------------------------------------------------------------------------------
+; Function:     trade-turns
+;
+; Author:       Daniel Nix
+;
+; Description:  Checks if there are any valid moves for the next player. If
+;				there are, it swaps the player and notifies who is next.
+;				Otherwise, the current player is told to play again.
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun trade-turns ()
+
+	(if (equal *color* 'b)
+
+		(if (not (null (move-generator *gameBoard* 'w)))
+			( setf *color* 'w)
+			(format t "Sorry White, no moves for you!~%")
+		)
+
+		(if (not (null (move-generator *gameBoard* 'b)))
+			( setf *color* 'b)
+			(format t "Sorry Black, no moves for you!~%")
+		)
+	)
+)
+
+;------------------------------------------------------------------------------
+; Function:     count-color
+;
+; Author:       Daniel Nix
+;
+; Description:  counts the number of pieces present on the board ()
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun count-color (color)
+	
+	(let 
+		(
+		(count '0)
+		)
+
+		(dolist (piece *gameBoard*)
+			(if (equal piece color)
+				(incf count)
+			)
+		)
+		(return-from count-color count)
+	)
+)
+
+;------------------------------------------------------------------------------
+; Function:     print-game-stats
+;
+; Author:       Daniel Nix
+;
+; Description:  based on the final board state, shows pieces for each player
+;				and the winner of this bout
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun print-game-stats ()
+
+	(let ( (black_count '0) (white_count '0) )
+		(setf black_count (count-color 'b))
+		(setf white_count (count-color 'w))
+
+		(format t "Black has ~d pieces~%" black_count)
+		(format t "White has ~d pieces~%" white_count)
+		(cond 
+			( (= black_count white_count)
+				(format t "Tie game!~%")
+			)
+
+			( (> black_count white_count)
+			  (format t "Black is the winner!!!~%")
+			)
+
+			( t (format t "White is the winner!!!~%") )
+		)
+	)
+
+)
 
 
 

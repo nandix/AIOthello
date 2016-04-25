@@ -52,13 +52,13 @@ Notes:
 		) ; end set local vars
 
 		; termination condition - all positions have been checked
-		((= play_pos 64))
+		((= play_pos 64) successors)
 
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
 ;		(print 'play_pos )
-		(print play_pos)
+		; (print play_pos)
 
 		; perform check and traverse until:
 			; hit own color - do nothing & move on
@@ -84,7 +84,7 @@ Notes:
 				)
 				(setf check_pos (+ check_pos -1) ) 
 			)
-			(print 'left)
+			; (print 'left)
 		) 
 
 		; check right
@@ -106,7 +106,7 @@ Notes:
 				)
 				(setf check_pos (+ check_pos 1) ) 
 			)
-			(print 'right)
+			; (print 'right)
 		)
 
 		; check up
@@ -128,7 +128,7 @@ Notes:
 
 				(setf check_pos (+ check_pos -8) ) 
 			)
-			(print 'up)
+			; (print 'up)
 		)
 
 		; check down 
@@ -150,7 +150,7 @@ Notes:
 
 				(setf check_pos (+ check_pos 8) ) 
 			)
-			(print 'down)
+			; (print 'down)
 		)
 
 		; check up-left 
@@ -173,7 +173,7 @@ Notes:
 
 				(setf check_pos (+ check_pos -9) ) 
 			)
-			(print 'up-left)
+			; (print 'up-left)
 		)
 
 		; check up-right
@@ -196,7 +196,7 @@ Notes:
 
 				(setf check_pos (+ check_pos -7) ) 
 			)
-			(print 'up-right)
+			; (print 'up-right)
 		)
 
 		; check down-left
@@ -219,7 +219,7 @@ Notes:
 
 				(setf check_pos (+ check_pos 7) ) 
 			)
-			(print 'down-left)
+			; (print 'down-left)
 		)
 
 		; check down-right
@@ -242,7 +242,7 @@ Notes:
 
 				(setf check_pos (+ check_pos 9) ) 
 			)
-			(print 'down-right)
+			; (print 'down-right)
 		)
 
 
@@ -259,9 +259,9 @@ Notes:
 		(setf down-left nil)
 		(setf down-right nil)
 
-		(print 'successors)
-		successors ; return successors
-		(print successors)
+		; (print successors)
+		; successors ; return successors
+		; (print successors)
 
 	) ;end do*
 ); end move-generate
@@ -286,12 +286,17 @@ Returns: a list of available moves from the current board state
 		(new_board (copy-list position)) 	; copy current board
 		(check_pos 0)			; position on the board to check pieces to flip
 		(check_dir 0)			; direction to check for pieces to flip
+		(flipped_flag nil)
 		(flip nil) )		; flag we want to flip, holds position to start flipping
 
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
-		(setf (nth placed_pos new_board) player)	
+		; Check if we tried to place a piece in a space already occupied
+		(if (equal (nth placed_pos new_board) '-)
+			(setf (nth placed_pos new_board) player)
+			(return-from board-generate new_board)
+		)	
 
 		; ********** check left of placed piece ********** 
 		(setf check_dir -1 )
@@ -301,7 +306,8 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
-					 (print flip) 
+					(setf flipped_flag 1)
+					 ;;(print flip) 
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -314,7 +320,8 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
-					(print flip)
+					(setf flipped_flag 1)
+					;(print flip)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -327,6 +334,7 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -339,6 +347,7 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -351,6 +360,7 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -363,6 +373,7 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -375,6 +386,7 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -387,8 +399,13 @@ Returns: a list of available moves from the current board state
 		(if flip 	(loop while (/= flip placed_pos ) do
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
+					(setf flipped_flag 1)
 					) ; end loop
 		) ;end if, (do nothing if not true)
+
+	(if (not flipped_flag)
+		(setf (nth placed_pos new_board) '-)
+	)
 
 	new_board
 	); end let
@@ -413,10 +430,17 @@ Returns: position of valid move or nil
 ***************************************************************************** |# 
 (defun check-flip-pieces (position start_pos player dir)
 	(let
-		(check_pos) 		; position to check for flipping
+		((check_pos) (prev_pos) (check_wrap)) 		; position to check for flipping
+
 		(setf start_flip nil) 	; position to return to start flipping
 		
 		(setf check_pos (+ start_pos dir))
+		(setf prev_pos (mod start_pos 8))
+
+		; check for wrap around col 0 and/or 7.
+		; direction negative - check for wrap back to col 7
+		; direction positive - check from wrap forward to col 0 
+		(if (< dir 0) (setf check_wrap 7) (setf check_wrap 0) )
 
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
@@ -427,9 +451,9 @@ Returns: position of valid move or nil
 		; 	piece of same color is found
 		(loop while( and (> check_pos -1) 	; check start of board
 					(< check_pos 64)	  	; check end of board
-					(< (mod check_pos 8) 7)	; check start of row
-					(> (mod check_pos 8) 0)	; check end of row
-;					(equal (nth check_pos position) oppose)  ; check oppose color
+;					(<= flip_count 7)		; check start of row
+;					(>= (mod check_pos 8) 0)	; check end of row
+					(/= (abs (- (mod check_pos 8) prev_pos)) 7)
 			  	    ) do ; end while conditions
 
 			; check to see if it's a blank spot, if yes, return
@@ -443,8 +467,11 @@ Returns: position of valid move or nil
 				(return)
 			) ; end when
 
+			(setf prev_pos (mod check_pos 8))
+
 			; increment while loop counter
 			(setf check_pos (+ check_pos dir) )
+			;(setf flip_count (+ flip_count 1))
 
 		) ; end while loop
 		start_flip
@@ -493,7 +520,7 @@ Returns: the board state after the user placed their piece or nil if it was
 		(if (equal position new_board) (setf new_board nil) new_board)
 
 		; return board-state
-		new-board
+		new_board
 
 	) ; end let
 ) ;end validate-move

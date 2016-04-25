@@ -4,7 +4,7 @@
 (defvar *firstMove* 'NIL)
 (defvar *color* 'black)
 
-(load 'printBoard)
+(load "printBoard.lsp")
 (load 'move_generator)
 ;------------------------------------------------------------------------------
 ; Function:     othello

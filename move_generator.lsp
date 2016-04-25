@@ -430,10 +430,17 @@ Returns: position of valid move or nil
 ***************************************************************************** |# 
 (defun check-flip-pieces (position start_pos player dir)
 	(let
-		(check_pos) 		; position to check for flipping
+		((check_pos) (prev_pos) (check_wrap)) 		; position to check for flipping
+
 		(setf start_flip nil) 	; position to return to start flipping
 		
 		(setf check_pos (+ start_pos dir))
+		(setf prev_pos (mod start_pos 8))
+
+		; check for wrap around col 0 and/or 7.
+		; direction negative - check for wrap back to col 7
+		; direction positive - check from wrap forward to col 0 
+		(if (< dir 0) (setf check_wrap 7) (setf check_wrap 0) )
 
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
@@ -444,9 +451,9 @@ Returns: position of valid move or nil
 		; 	piece of same color is found
 		(loop while( and (> check_pos -1) 	; check start of board
 					(< check_pos 64)	  	; check end of board
-					(<= (mod check_pos 8) 7)	; check start of row
-					(>= (mod check_pos 8) 0)	; check end of row
-;					(equal (nth check_pos position) oppose)  ; check oppose color
+;					(<= flip_count 7)		; check start of row
+;					(>= (mod check_pos 8) 0)	; check end of row
+					(/= (abs (- (mod check_pos 8) prev_pos)) 7)
 			  	    ) do ; end while conditions
 
 			; check to see if it's a blank spot, if yes, return
@@ -460,8 +467,11 @@ Returns: position of valid move or nil
 				(return)
 			) ; end when
 
+			(setf prev_pos (mod check_pos 8))
+
 			; increment while loop counter
 			(setf check_pos (+ check_pos dir) )
+			;(setf flip_count (+ flip_count 1))
 
 		) ; end while loop
 		start_flip

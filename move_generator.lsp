@@ -292,6 +292,7 @@ Returns: a list of available moves from the current board state
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
+		; Check if we tried to place a piece in a space already occupied
 		(if (equal (nth placed_pos new_board) '-)
 			(setf (nth placed_pos new_board) player)
 			(return-from board-generate new_board)
@@ -443,8 +444,8 @@ Returns: position of valid move or nil
 		; 	piece of same color is found
 		(loop while( and (> check_pos -1) 	; check start of board
 					(< check_pos 64)	  	; check end of board
-					(< (mod check_pos 8) 7)	; check start of row
-					(> (mod check_pos 8) 0)	; check end of row
+					(<= (mod check_pos 8) 7)	; check start of row
+					(>= (mod check_pos 8) 0)	; check end of row
 ;					(equal (nth check_pos position) oppose)  ; check oppose color
 			  	    ) do ; end while conditions
 

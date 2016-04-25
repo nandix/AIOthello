@@ -5,7 +5,10 @@
 (defvar *color* 'black)
 
 (load "printBoard.lsp")
-(load 'move_generator)
+(load "move_generator.lsp")
+(load "static_eval.lsp")
+(load "minimax.lsp")
+
 ;------------------------------------------------------------------------------
 ; Function:     othello
 ;

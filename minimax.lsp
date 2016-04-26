@@ -21,27 +21,27 @@ Functions called:
               predicate that returns T if the current position has reached
               the desired search depth, NIL otherwise.
 
-          (move-generator position) -
+          (move-generator position player) -
               generates successors to the position.
 
-          (static position) -
+          (static position player) -
               applies the static evaluation function to the position.
 
           Note: these functions may need additional arguments.
 |#
 
-(defun minimax (position depth)
+(defun minimax (position ply curr_depth player)
 
     ; if we have searched deep enough, or there are no successors,
     ; return position evaluation and nil for the path
-    (if (or (deepenough depth) (null (move-generator position)))
-        (list (static position) nil)
+    (if (or (deepenough ply curr_depth) (null (move-generator position player)))
+        (list (static position player) nil)
 
         ; otherwise, generate successors and run minimax recursively
         (let
             (
                 ; generate list of sucessor positions
-                (successors (move-generator position))
+                (successors (move-generator position player))
 
                 ; initialize current best path to nil
                 (best-path nil)
@@ -58,7 +58,7 @@ Functions called:
             (dolist (successor successors)
 
                 ; perform recursive DFS exploration of game tree
-                (setq succ-value (minimax successor (1- depth)))
+                (setq succ-value (minimax successor ply (1- depth) player))
 
                 ; change sign every ply to reflect alternating selection
                 ; of MAX/MIN player (maximum/minimum value)
@@ -70,10 +70,16 @@ Functions called:
                       (setq best-score succ-score)
                       (setq best-path (cons successor (cdr succ-value)))
                 )
-            )
-
+           ) 
             ; return (value path) list when done
             (list best-score best-path)
         )
     )
+)
+
+;(deepenough depth) -
+; predicate that returns T if the current position has reached
+; the desired search depth, NIL otherwise.
+(defun deepenough (ply depth)
+	(if (= ply depth) T NIL)
 )

@@ -1,12 +1,46 @@
+;------------------------------------------------------------------------------
+; Program:		Othello
+;
+; Authors:      Steph Athow, Daniel Nix
+;
+; Description:  (From Specificaiton Document) Othello (also known as Reversi) 
+;			is played on an 8x8 grid with 64 stones that are black on one
+;			side and white on the other. 
+;
+;			This program uses Minimax with Alpha Beta pruning to serve as a
+;			computer player. The game may be started in two ways:
+;				1) clisp othello.lsp [black|white]
+;				2) clisp
+;					From inside interpreter: 	(load 'othello)
+;												(othello '[black|white])
+;
+;			First, the user decides between Human vs Human, Human vs Computer,
+;			and Computer vs computer.
+;
+;			A startup sequence to choose who goes first follows.
+;			At this point, the user is also prompted to choose how deep into
+;			the minimax tree the search should go (the number of plys)
+;
+;			If the user color wins, the game is over. If not, a prompt for
+;			revenge is provided
+;
+; Parameters:   player: the color to play as (either "black" or "white", 
+;						not b or w)
+;
+; Return:       none
+;------------------------------------------------------------------------------
 
-; Initialize globals
+
+; Initialize globals used for tracking colors, the single board state, and
+;	whose turn it is
 (defvar *gameBoard*)
 (defvar *firstMove* 'NIL)
 (defvar *playerColor* 'black)
 (defvar *oppColor* 'white)
 (defvar *curColor* 'black)
 (defvar *playMode* 0)
-(defvar *numPlys* 1)
+(defvar *playerPlys* 1)
+(defvar *oppPlys* 1)
 
 (load "printBoard.lsp")
 (load "move_generator.lsp")
@@ -24,7 +58,7 @@
 ;				sequence, asking the user what color they want to play
 ;				as and whether they want to play first.
 ;
-; Parameters:   none
+; Parameters:   player: the color of pieces the user player wants to be
 ;
 ; Return:       none
 ;------------------------------------------------------------------------------
@@ -56,16 +90,20 @@
 			; Print the start state for the user
 			(printBoard)
 
-			
+			; While the game is not over
 			(loop while (not (game-over)) do
+				; Take a turn
 				(take-turn)
+				; Print the board
 				(printBoard)
+				; Trade turns, if we haven't ended the game and moves
+				;	are available to the next player
 				(if (not (game-over)) 
 					(trade-turns)
 				)
 			)
 
-			; See if the player won. If not, ask for revenge
+			; See if the user player won. If not, ask for revenge
 			(let (winner)
 				(setf winner (print-game-stats))
 
@@ -94,6 +132,7 @@
 ; Return:       none
 ;------------------------------------------------------------------------------
 (defun ask-for-revenge ()
+	; 
 	(format t "  You lost! Would you like a chance at revenge [y/n]? ")
 	(let (revenge? 'NIL)
 		(loop while (null revenge?) do
@@ -119,8 +158,7 @@
 ;
 ; Author:       Daniel Nix
 ;
-; Description:  othello-init is responsible for setting up the player mode and
-;				which player should go first in this game of othello
+; Description:  othello-set-play-style is responsible for configuring the 
 ;
 ; Parameters:   none
 ;
@@ -163,9 +201,20 @@
 		)
 	)
 
-	; In testing, let the user input the color here. Not in production code.
-	; (format t "What color would you like to be [black/white]? ")
-	; (setf *playerColor* (read))
+	(cond 
+		((= *playMode* 2)
+			(format t "Enter number of plys to search: ")
+			(setf *oppPlys* (read))
+		)
+
+		((= *playMode* 3)
+			(format t "Enter number of plys for ~s: " *playerColor*)
+			(setf *playerPlies* (read))
+			(format t "Enter number of plys for ~s: " *oppColor*)
+			(setf *oppPlys* (read))
+		)
+
+	)
 
 
 	(format t "OK! You will be playing as ~s. When asked for your move, please enter the row~%
@@ -197,27 +246,6 @@
 			- - - - - - - -
 			- - - - - - - - ))
 
-	; Black win start
-	; (setf *gameBoard* 
-	; 	'( 	B B B B B B B B
-	; 		B B B B B B B W
-	; 		B B B B B B B W
-	; 		B B B B B B B W
-	; 		B B B B B B B W
-	; 		B B B B B B B W
-	; 		B B B B B B B W
-	; 		B B B B B B B - ))
-
-	; White win start
-	; (setf *gameBoard* 
-	; 	'( 	W W W W W W W W
-	; 		W W W W W W W B
-	; 		W W W W W W W B
-	; 		W W W W W W W B
-	; 		W W W W W W W B
-	; 		W W W W W W W B
-	; 		W W W W W W W B
-	; 		W W W W W W W - ))
 
 	; To start the game, set the first player's color depending on if Player 1
 	;	wanted to move first or second
@@ -272,6 +300,34 @@
 
 )
 
+;------------------------------------------------------------------------------
+; Function:     make-computer-move
+;
+; Author:       Daniel Nix
+;
+; Description:  Makes a move for a computer player. This serves as a layer
+;				over the make-move function so that user and computer moves
+;				follow the same form
+;
+; Parameters:   none
+;
+; Return:       t if board is full, NIL otherwise
+;------------------------------------------------------------------------------
+(defun make-computer-move (board player numPlys)
+
+	(let (move index)
+		(setf move (make-move board player numPlys))
+
+		(format t "Computer ~s moving to (row,col): (~d, ~d)~%~%" 
+			player (nth 0 move) (nth 1 move))
+		; Decrement the row and column for zero indexing
+		(setf *gameBoard* (validate-move *gameBoard* move player))
+
+
+	)
+
+)
+
 
 ;------------------------------------------------------------------------------
 ; Function:     game-over
@@ -286,7 +342,16 @@
 ; Return:       t if board is full, NIL otherwise
 ;------------------------------------------------------------------------------
 (defun game-over ()
-	(not (member '- *gameBoard*))
+	; The game is over when there are either...
+	(or
+		; No more spaces
+		(not (member '- *gameBoard*))
+		; Neither player can move
+		(and
+			(null (move-generator *gameBoard* 'w))
+			(null (move-generator *gameBoard* 'b))
+		)
+	)
 )
 
 
@@ -422,8 +487,8 @@
 				(make-user-move)
 			)
 			(t
-				(format t "Computer turn as ~s~%" *curColor*)
-				(make-move *gameBoard* *oppColor* numPlys)
+				;(format t "Computer turn as ~s~%" *curColor*)
+				(make-computer-move *gameBoard* *oppColor* *oppPlys*)
 			)
 		)
 	)
@@ -431,8 +496,11 @@
 	; If human vs computer, call computer then computer
 	(cond 
 		((= *playMode* 3)
-			(format t "Computer turn as ~s~%" *curColor*)
-			(make-move *gameBoard* *curColor* numPlys)
+			;(format t "Computer turn as ~s~%" *curColor*)
+			(if (equal *curColor* *playerColor*)
+				(make-computer-move *gameBoard* *curColor* *playerPlies*)
+				(make-computer-move *gameBoard* *curColor* *oppPlys*)
+			)
 		)
 	)
 )

@@ -30,7 +30,7 @@ Functions called:
           Note: these functions may need additional arguments.
 |#
 
-(defun minimax (position ply curr_depth player)
+(defun minimax (position ply curr_depth player mm_player alpha beta)
 
     ; if we have searched deep enough, or there are no successors,
     ; return position evaluation and nil for the path
@@ -47,30 +47,49 @@ Functions called:
                 (best-path nil)
 
                 ; initialize current best score to negative infinity
-                (best-score -1000000)
+				best-score
 
                 ; other local variables
                 succ-value
                 succ-score
             )
 
+			(if (equal mm_player 'MAX) (setf best-score -1000000) (setf best-score 1000000) )
+
             ; explore possible moves by looping through successor positions
             (dolist (successor successors)
 
-                ; perform recursive DFS exploration of game tree
-                (setq succ-value (minimax successor ply (1+ curr_depth) player))
+				; Decide if we need to make a recursive call, or employ alpha beta pruning
+                (cond 
+					((not (prune alpha beta mm_player))
+						; perform recursive DFS exploration of game tree
+						(setq succ-value (minimax successor ply (1+ curr_depth) player (swap-player mm_player) alpha beta))
 
-                ; change sign every ply to reflect alternating selection
-                ; of MAX/MIN player (maximum/minimum value)
-                (setq succ-score (- (car succ-value)))
+						(setq succ-score (car succ-value))
 
-                ; update best value and path if a better move is found
-                ; (note that path is being stored in reverse order)
-                (when (> succ-score best-score)
-                      (setq best-score succ-score)
-                      (setq best-path (cons successor (cdr succ-value)))
-                )
-            )
+						(cond 
+							( (equal mm_player 'MAX)
+								; update best value and path if a better move is found
+								; (note that path is being stored in reverse order)
+								(when (> succ-score best-score)
+									  (setq best-score succ-score)
+									  (setq best-path (cons successor (cdr succ-value)))
+									  (setf alpha succ-score)
+								)
+							)
+							( (equal mm_player 'MIN)
+								; update best value and path if a better move is found
+								; (note that path is being stored in reverse order)
+								(when (< succ-score best-score)
+									  (setq best-score succ-score)
+									  (setq best-path (cons successor (cdr succ-value)))
+									  (setf beta succ-score)
+								)
+							)
+						); end cond MAX or MIN
+					) ; end cond not block 
+				) ;end cond recursion call
+            ) ;end do list
 
             ; return (value path) list when done
             (list best-score best-path)
@@ -83,4 +102,25 @@ Functions called:
 ; the desired search depth, NIL otherwise.
 (defun deep-enough (ply depth)
   (if (= ply depth) T NIL)
+)
+
+; swaps min and max player label
+(defun swap-player (mm_player)
+	(if (equal mm_player 'MAX) (setf mm_player 'MIN) (setf mm_player 'MAX))
+)
+
+(defun prune (alpha beta mm_player)
+
+	(cond 
+		; If we're in a MAX node
+		((equal mm_player 'MAX)
+			; Prune if alpha >= beta
+			(>= alpha beta)
+		)
+		; If we're in a MIN node
+		(t
+			; Prune if beta <= alpha
+			(<= beta alpha)
+		)
+	)
 )

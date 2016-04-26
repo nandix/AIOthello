@@ -10,6 +10,7 @@
 
 (load "printBoard.lsp")
 (load "move_generator.lsp")
+(load "static_eval.lsp")
 (load "make_move.lsp")
 (load "minimax.lsp")
 

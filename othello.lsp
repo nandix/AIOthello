@@ -2,11 +2,16 @@
 ; Initialize globals
 (defvar *gameBoard*)
 (defvar *firstMove* 'NIL)
-(defvar *color* 'black)
+(defvar *playerColor* 'black)
+(defvar *oppColor* 'white)
+(defvar *curColor* 'black)
+(defvar *playMode* 0)
+(defvar *numPlys* 1)
 
 (load "printBoard.lsp")
 (load "move_generator.lsp")
 (load "static_eval.lsp")
+(load "make_move.lsp")
 (load "minimax.lsp")
 
 ;------------------------------------------------------------------------------
@@ -23,24 +28,149 @@
 ;
 ; Return:       none
 ;------------------------------------------------------------------------------
-(defun othello ()
+(defun othello ( player )
 
-	; Initialize the game board
-	(othello-init)
-
-	(printBoard)
-
-	(loop while (not (game-is-done)) do
-
-		(format t "Player ~s, your turn!~%" *color*)
-		(make-user-move)
-		(printBoard)
-		(trade-turns)
+	; Ge the color from input arg
+	(setf *playerColor* player)
+	;If the color is black, set it to b. Otherwise, set to w.
+	(if (or (equal *playerColor* 'black) (equal *playerColor* "black"))
+		(setf *playerColor* 'b)
+		(setf *playerColor* 'w)
+	)
+	; Set opposition player based on user player color
+	(if (equal *playerColor* 'b)
+		(setf *oppColor* 'w)
+		(setf *oppColor* 'b)
 	)
 
-	(print-game-stats)
+	; Set up 2 player, H v C, or C v C. Also determine who goes first
+	(othello-set-play-style)
+	
+	(let ((keep_playing 't))
+		(loop while (not (null keep_playing)) do
+			
+
+			; Initialize the game board
+			(othello-init)
+
+			; Print the start state for the user
+			(printBoard)
+
+			
+			(loop while (not (game-over)) do
+				(take-turn)
+				(printBoard)
+				(if (not (game-over)) 
+					(trade-turns)
+				)
+			)
+
+			; See if the player won. If not, ask for revenge
+			(let (winner)
+				(setf winner (print-game-stats))
+
+				; If the first player didn't win...
+				(if (not (equal winner *playerColor*))
+					(setf keep_playing (ask-for-revenge))
+					(setf keep_playing 'NIL)
+				)
+			)
+		)
+	)
 
 
+)
+
+
+;------------------------------------------------------------------------------
+; Function:     ask-for-revenge
+;
+; Author:       Daniel Nix
+;
+; Description:  If the player loses, ask if the player wants revenge
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun ask-for-revenge ()
+	(format t "  You lost! Would you like a chance at revenge [y/n]? ")
+	(let (revenge? 'NIL)
+		(loop while (null revenge?) do
+			(setf revenge? (read))
+			(cond
+				((equal revenge? 'y)
+					(return-from ask-for-revenge 't)
+				)
+				((equal revenge? 'n)
+					(return-from ask-for-revenge 'NIL)
+				)
+				(t 
+					(format t "Invalid entry. Please enter y or n: ")
+					(setf revenge? 'NIL)
+				)
+			)
+		)
+	)
+)
+
+;------------------------------------------------------------------------------
+; Function:     othello-set-play-style
+;
+; Author:       Daniel Nix
+;
+; Description:  othello-init is responsible for setting up the player mode and
+;				which player should go first in this game of othello
+;
+; Parameters:   none
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun othello-set-play-style ()
+
+	; Determine which style game the user wants to play
+	(format t "How would you like to play:~%")
+	(format t "  (1) Human vs Human~%")
+	(format t "  (2) Human vs Computer~%")
+	(format t "  (3) Computer vs Computer~%")
+	(format t "Please enter selection: ")
+	; While the user has entered an invalid option, prompt again
+	(loop while (or (< *playMode* 1) (> *playMode* 3)) do
+		(setf *playMode* (read))
+		(if (or (< *playMode* 1) (> *playMode* 3))
+			(format t "Invalid mode. Please try again: ")
+		)
+	)
+	
+
+	; Ask the user if they would like to move first
+	(cond 
+		((< *playMode* 3)
+			(format t "Would you like to move first [y/n]? ")
+			(setf *firstMove* (read))
+
+			; For simplicity later, set first move to t or nil,
+			;	not y or n
+			(cond 
+				((equal *firstMove* 'y)
+					(setf *firstMove* 't)
+				)
+				(t
+					(setf *firstMove* 'NIL)
+				)
+			)
+			
+		)
+	)
+
+	; In testing, let the user input the color here. Not in production code.
+	; (format t "What color would you like to be [black/white]? ")
+	; (setf *playerColor* (read))
+
+
+	(format t "OK! You will be playing as ~s. When asked for your move, please enter the row~%
+	and column in which you would like to place a ~s stone. Remember, you must~%
+	outflank at least one ~s stone, or forfeit your move.~%~%" *playerColor* *playerColor* *oppColor*)
 )
 
 ;------------------------------------------------------------------------------
@@ -56,6 +186,7 @@
 ;------------------------------------------------------------------------------
 (defun othello-init ()
 
+	; Actual start
 	(setf *gameBoard* 
 		'( 	- - - - - - - -
 			- - - - - - - -
@@ -66,26 +197,42 @@
 			- - - - - - - -
 			- - - - - - - - ))
 
-	; Ask the user if they would like to move first
-	(format t "Would you like to move first [y/n]? ")
-	(setf *firstMove* (read))
-	(if (equal *firstMove* 'n)
-		(setf *firstMove* 'NIL)
-		(setf *firstMove* 't)
+	; Black win start
+	; (setf *gameBoard* 
+	; 	'( 	B B B B B B B B
+	; 		B B B B B B B W
+	; 		B B B B B B B W
+	; 		B B B B B B B W
+	; 		B B B B B B B W
+	; 		B B B B B B B W
+	; 		B B B B B B B W
+	; 		B B B B B B B - ))
+
+	; White win start
+	; (setf *gameBoard* 
+	; 	'( 	W W W W W W W W
+	; 		W W W W W W W B
+	; 		W W W W W W W B
+	; 		W W W W W W W B
+	; 		W W W W W W W B
+	; 		W W W W W W W B
+	; 		W W W W W W W B
+	; 		W W W W W W W - ))
+
+	; To start the game, set the first player's color depending on if Player 1
+	;	wanted to move first or second
+	(cond 
+		((equal *firstMove* 't)
+			(setf *curColor* *playerColor*)
+		)
+		(t
+			(if (equal *playerColor* 'b)
+				(setf *curColor* 'w)
+				(setf *curColor* 'b)
+			)
+		)
 	)
-	(format t "What color would you like to be [black/white]? ")
-	(setf *color* (read))
-
-	;If the color is black, set it to b. Otherwise, set to w.
-	(if (equal *color* 'black)
-		(setf *color* 'b)
-		(setf *color* 'w)
-	)
-
-
-	(format t "OK! You will be playing ~s. When asked for your move, please enter the row~%
-	and column in which you would like to place a ~s stone. Remember, you must~%
-	outflank at least one White stone, or forfeit your move.~%~%" *color* *color*)
+	
 )
 
 ;------------------------------------------------------------------------------
@@ -114,12 +261,12 @@
 			(format t "What is your move [row col]? ")
 			(setf row (read))
 			(setf col (read))
-			(setf valid (validate-move *gameBoard* (list row col) *color*) )
+			(setf valid (validate-move *gameBoard* (list row col) *curColor*) )
 			(if (not valid)
 				(format t "Invalid move, please try again~%")
 			)
 		)
-		(format t "Row is: ~d, col: ~d~%" row col)
+		(format t "~%")
 		(setf *gameBoard* valid)
 	)
 
@@ -127,7 +274,7 @@
 
 
 ;------------------------------------------------------------------------------
-; Function:     game-is-done
+; Function:     game-over
 ;
 ; Author:       Daniel Nix
 ;
@@ -138,7 +285,7 @@
 ;
 ; Return:       t if board is full, NIL otherwise
 ;------------------------------------------------------------------------------
-(defun game-is-done ()
+(defun game-over ()
 	(not (member '- *gameBoard*))
 )
 
@@ -158,15 +305,15 @@
 ;------------------------------------------------------------------------------
 (defun trade-turns ()
 
-	(if (equal *color* 'b)
+	(if (equal *curColor* 'b)
 
 		(if (not (null (move-generator *gameBoard* 'w)))
-			( setf *color* 'w)
+			( setf *curColor* 'w)
 			(format t "Sorry White, no moves for you!~%")
 		)
 
 		(if (not (null (move-generator *gameBoard* 'b)))
-			( setf *color* 'b)
+			( setf *curColor* 'b)
 			(format t "Sorry Black, no moves for you!~%")
 		)
 	)
@@ -214,25 +361,87 @@
 (defun print-game-stats ()
 
 	(let ( (black_count '0) (white_count '0) )
+		; Count how many pieces from each side
 		(setf black_count (count-color 'b))
 		(setf white_count (count-color 'w))
 
+		; Print how many pieces on each side
 		(format t "Black has ~d pieces~%" black_count)
 		(format t "White has ~d pieces~%" white_count)
 		(cond 
+			; If it's a tie game, print stats and return the opposing
+			;	color
 			( (= black_count white_count)
 				(format t "Tie game!~%")
+				(return-from print-game-stats *oppColor*)
 			)
-
+			; If black won, print stats and return black
 			( (> black_count white_count)
-			  (format t "Black is the winner!!!~%")
+			 	(format t "Black is the winner!!!~%")
+			  	(return-from print-game-stats 'b)
+			)
+			; If white won, print stats and return white
+			( t 
+				(format t "White is the winner!!!~%") 
+				(return-from print-game-stats 'w)
 			)
 
-			( t (format t "White is the winner!!!~%") )
 		)
 	)
 
 )
 
+;------------------------------------------------------------------------------
+; Function:     take-turn
+;
+; Author:       Daniel Nix
+;
+; Description:  Depending on who the current player is, take the next move 
+;				from the user or computer
+;
+; Parameters:   Optional- numPlys: plys to search for minimax
+;
+; Return:       none
+;------------------------------------------------------------------------------
+(defun take-turn ( &optional (numPlys 1) )
 
+	; If human vs human, call the human move
+	(cond  
+		((= *playMode* 1)
+			(format t "Player ~s, your turn!~%" *curColor*)
+			(make-user-move)
+		)
+	)
+
+	; If human vs computer, call human if player turn. Otherwise,
+	;	call computer
+	(if (= *playMode* 2)
+		(cond 
+			((equal *curColor* *playerColor*)
+				(format t "Player ~s, your turn!~%" *curColor*)
+				(make-user-move)
+			)
+			(t
+				(format t "Computer turn as ~s~%" *curColor*)
+				(make-move *gameBoard* *oppColor* numPlys)
+			)
+		)
+	)
+
+	; If human vs computer, call computer then computer
+	(cond 
+		((= *playMode* 3)
+			(format t "Computer turn as ~s~%" *curColor*)
+			(make-move *gameBoard* *curColor* numPlys)
+		)
+	)
+)
+
+; If run from the command line, start it here!
+;If the user supplied a cmdline argument, call 8puzzle with that argument
+(cond
+	( (> (length *args*) 0)
+		(othello  (car *args*))
+	)
+)
 

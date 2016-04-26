@@ -48,6 +48,8 @@ Functions called:
 
                 ; initialize current best score to negative infinity
                 (best-score -1000000)
+;				(alpha -1000000)
+;				(beta 1000000)
 
                 ; other local variables
                 succ-value
@@ -64,6 +66,9 @@ Functions called:
                 ; of MAX/MIN player (maximum/minimum value)
                 (setq succ-score (- (car succ-value)))
 
+				; set alpha and beta for the node
+
+
                 ; update best value and path if a better move is found
                 ; (note that path is being stored in reverse order)
 				; alpha-beta pruning:
@@ -72,21 +77,29 @@ Functions called:
 				;	beta (min) cutoff: stop search below MAX node when
 				;		alpha >= beta of ancestor
 
-				(cond
-	                (when (> succ-score 0)
+;				(cond
+;	                (when (> succ-score 0) 		; alpha (MAX)
 						(when (> succ-score best-score)
 		                     (setq best-score succ-score)
 		                     (setq best-path (cons successor (cdr succ-value)))
 	                	)
-					)
-					(when ( <= succ-score 0)
-						(when (< succ-score best-score)
-							(setq best-score succ-score)
-							(setq best-path (cons successor (cdr succ-value)))
-						)
-					)
-				)
-           ) 
+						; prune
+;						(when (>= alpha beta)
+;							(return)
+;						)
+;					)
+;					(when ( <= succ-score 0) 	; beta (MIN)
+;						(when (< succ-score best-score)
+;							(setq best-score succ-score)
+;							(setq best-path (cons successor (cdr succ-value)))
+;						)
+						; prune
+;						(when (<= beta alpha)
+;							(return)
+;						)
+;					)
+;				)
+;          ) 
             ; return (value path) list when done
             (list best-score best-path)
         )

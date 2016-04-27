@@ -13,9 +13,11 @@
 (defun make-move (boardState player ply)
 
 	(let (movedBoard) 
+		; Set the board to the next step indicated by minimax
 		(setf movedBoard 
 			(car (nth 1 (minimax *gameBoard* ply '0 player 'MAX -1000000 1000000) ) ) )
 
+		; Convert the new game board to a row/col position to move
 		(newboard-to-move *gameBoard* movedBoard)
 	)
 )
@@ -25,12 +27,14 @@
 ;
 ; Author:       Daniel Nix
 ;
-; Description:  Prompts a user for a row/col for the next move. Loops until
-;				a valid move has been made
+; Description:  Takes a previous and new board configuration and determines
+;					where the most recent move was placed
 ;
-; Parameters:   none
+; Parameters:   origBoard: original board state
+;				newBoard: new board state
 ;
-; Return:       none
+; Return:       move: 1 indexed (row col) list indicating where the move was 
+;						taken
 ;------------------------------------------------------------------------------
 (defun newboard-to-move (origBoard newBoard)
 
@@ -59,10 +63,12 @@
 		; Convert the index to column and row
 		(setf col  (mod movedIndex 8))
 		
+		; Compute 1 based row
 		(setf row
 			(1+ (/ (- movedIndex col) 8))
 		)
 
+		; Convert the column to 1 based index
 		(incf col)
 
 		(list row col)
@@ -84,6 +90,8 @@
 
 	(cond
 		(
+			; If the previous board was blank and the 
+			;	new board holds a piece, return true. Otherwise return false
 			(and 
 				(equal c1 '-)
 				(or 

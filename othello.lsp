@@ -201,6 +201,8 @@
 		)
 	)
 
+	; If the user wants to play againsta  computer, or pit two computers against
+	;	each other, get the plys to search here
 	(cond 
 		((= *playMode* 2)
 			(format t "Enter number of plys to search: ")
@@ -235,7 +237,7 @@
 ;------------------------------------------------------------------------------
 (defun othello-init ()
 
-	; Actual start
+	; Initialize the starting position
 	(setf *gameBoard* 
 		'( 	- - - - - - - -
 			- - - - - - - -
@@ -269,7 +271,8 @@
 ; Author:       Daniel Nix
 ;
 ; Description:  Prompts a user for a row/col for the next move. Loops until
-;				a valid move has been made
+;				a valid move has been made. The validity of move is determined by
+;				the validate-move function.
 ;
 ; Parameters:   none
 ;
@@ -316,11 +319,13 @@
 (defun make-computer-move (board player numPlys)
 
 	(let (move index)
+		; Use the required make-move function to determine the position
 		(setf move (make-move board player numPlys))
 
 		(format t "Computer ~s moving to (row,col): (~d, ~d)~%~%" 
 			player (nth 0 move) (nth 1 move))
-		; Decrement the row and column for zero indexing
+
+		; Make the move from the make-move function
 		(setf *gameBoard* (validate-move *gameBoard* move player))
 
 
@@ -334,12 +339,12 @@
 ;
 ; Author:       Daniel Nix
 ;
-; Description:  Checks if the game is over. Returns t if all spaces are filled.
-;				Returns NIL otherwise
+; Description:  Checks if the game is over. Returns t if all spaces are filled
+;				or no valid moves are left. Returns NIL otherwise
 ;
 ; Parameters:   none
 ;
-; Return:       t if board is full, NIL otherwise
+; Return:       t if board is game has finished, NIL otherwise
 ;------------------------------------------------------------------------------
 (defun game-over ()
 	; The game is over when there are either...
@@ -389,9 +394,9 @@
 ;
 ; Author:       Daniel Nix
 ;
-; Description:  counts the number of pieces present on the board ()
+; Description:  counts the number of pieces of a given color present on the board 
 ;
-; Parameters:   none
+; Parameters:   color: 'b or 'w to count
 ;
 ; Return:       none
 ;------------------------------------------------------------------------------

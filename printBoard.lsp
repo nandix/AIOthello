@@ -82,8 +82,6 @@
             )
             
         )
-        ; Append a nil to the end of the last list
-        ;(setf (cdr (last (car(last splitList)))) (cons 'NIL 'NIL) )
 
         ; Return the list of puzzles split into puz per line
         (return-from splitBoardList splitList)

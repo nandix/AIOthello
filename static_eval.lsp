@@ -1,4 +1,21 @@
-
+;------------------------------------------------------------------------------
+; Function:     static
+;
+; Author:       Steph Athow, Dan Nix
+;
+; Description:  Computes a static evaluation function for a given othello board.
+;				Begins with the difference between one player and another and
+;				adds to it:
+;					- corners worth +5 (corners cannot be flipped)
+;					- edges worth +2 (edges less likely to be flipped)
+;				It is an attempt to give "good" board positions a high score
+;				and "bad" board positions a lower score.
+;
+; Parameters:   position: current board state
+;				player: the player we are evaluating for ('b or 'w)
+;
+; Return:       total_val: the total accumulated value from the SEF
+;------------------------------------------------------------------------------
 (defun static (position player)
 	(let 
 		(

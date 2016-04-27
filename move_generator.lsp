@@ -1,36 +1,27 @@
-#| ********************* Move_Generator.lsp ***********************************
-
-Function: move-generator 
-Author: Stephanie Athow
-
-Description: Generates possible successor moves given current board state
-
-Parameters: 
-	Position: a list containing the current board state
-	Player: the player making a move, will be black ('b) or white ('w)
-
-Returns: a list of available moves from the current board state
-
-Notes:
-	Moves Rules:
-		-Capture at least 1 of opposing color
-		-Placed adjacent to opposing color (left, right, up, down, and diagonal)
-		-New piece must be in line (left, right, up, down, diagonal)
-			with an exisiting board piece 
-		-Pieces are flipped between placed piece and exisiting piece of 
-			player's color. Also check for pieces to be flipped that 
-			connect to other pieces of player's color
-***************************************************************************** |#
-
-(setf test-position '(- - - - - - - - - - - - - - - - - - - - - - - - - - - w b - - - - - - b w - - - - - - - - - - - - - - - - - - - - - - - - - - -))
-
-(setf test-position2 '(- - - - - - - - - - - - - - - - - - - - - - - - - - b b b - - - - - - b w - - - - - - - - - - - - - - - - - - - - - - - - - - -))
-
-(setf test-position3 '(- - - - - - - - - - - - - - - - - - W - - - - - - - B W B - - - - - - B W - - - - - - - - - - - - - - - - - - - - - - - - - - -) )
-
-(setf test-player-b 'b)
-(setf test-player-w 'w)
-
+;------------------------------------------------------------------------------
+; ********************* Move_Generator.lsp ***********************************
+;
+;Function: move-generator 
+;Author: Stephanie Athow
+;
+;Description: Generates possible successor moves given current board state
+;
+;Parameters: 
+;	Position: a list containing the current board state
+;	Player: the player making a move, will be black ('b) or white ('w)
+;
+;Returns: a list of available moves from the current board state
+;
+;Notes:
+;	Moves Rules:
+;		-Capture at least 1 of opposing color
+;		-Placed adjacent to opposing color (left, right, up, down, and diagonal)
+;		-New piece must be in line (left, right, up, down, diagonal)
+;			with an exisiting board piece 
+;		-Pieces are flipped between placed piece and exisiting piece of 
+;			player's color. Also check for pieces to be flipped that 
+;			connect to other pieces of player's color
+;------------------------------------------------------------------------------
 (defun move-generator (position player)
 	(do*
 		(
@@ -57,9 +48,6 @@ Notes:
 		; set oppenent color
 		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
-;		(print 'play_pos )
-		; (print play_pos)
-
 		; perform check and traverse until:
 			; hit own color - do nothing & move on
 			; hit wall - do nothing & move on
@@ -84,7 +72,6 @@ Notes:
 				)
 				(setf check_pos (+ check_pos -1) ) 
 			)
-			; (print 'left)
 		) 
 
 		; check right
@@ -106,7 +93,6 @@ Notes:
 				)
 				(setf check_pos (+ check_pos 1) ) 
 			)
-			; (print 'right)
 		)
 
 		; check up
@@ -128,7 +114,6 @@ Notes:
 
 				(setf check_pos (+ check_pos -8) ) 
 			)
-			; (print 'up)
 		)
 
 		; check down 
@@ -150,7 +135,6 @@ Notes:
 
 				(setf check_pos (+ check_pos 8) ) 
 			)
-			; (print 'down)
 		)
 
 		; check up-left 
@@ -170,10 +154,8 @@ Notes:
 				(when (equal (nth check_pos position) player)
 					(return)
 				)
-
 				(setf check_pos (+ check_pos -9) ) 
 			)
-			; (print 'up-left)
 		)
 
 		; check up-right
@@ -193,10 +175,8 @@ Notes:
 				(when (equal (nth check_pos position) player)
 					(return)
 				)
-
 				(setf check_pos (+ check_pos -7) ) 
 			)
-			; (print 'up-right)
 		)
 
 		; check down-left
@@ -216,10 +196,8 @@ Notes:
 				(when (equal (nth check_pos position) player)
 					(return)
 				)
-
 				(setf check_pos (+ check_pos 7) ) 
 			)
-			; (print 'down-left)
 		)
 
 		; check down-right
@@ -242,7 +220,6 @@ Notes:
 
 				(setf check_pos (+ check_pos 9) ) 
 			)
-			; (print 'down-right)
 		)
 
 
@@ -259,28 +236,23 @@ Notes:
 		(setf down-left nil)
 		(setf down-right nil)
 
-		; (print successors)
-		; successors ; return successors
-		; (print successors)
-
 	) ;end do*
 ); end move-generate
 
-#| ****************************************************************************
-Function: board-generate
-
-Author: Stephanie Athow
-
-Description: Generates successor move based on current board state
-
-Parameters: 
-	Position: a list containing the current board state
-	move_pos: the position to place the current player's piece
-	Player: the player making a move, will be black ('b) or white ('w)
-
-Returns: a list of available moves from the current board state
-
-***************************************************************************** |# 
+;------------------------------------------------------------------------------
+;Function: board-generate
+;
+;Author: Stephanie Athow
+;
+;Description: Generates successor move based on current board state
+;
+;Parameters: 
+;	Position: a list containing the current board state
+;	move_pos: the position to place the current player's piece
+;	Player: the player making a move, will be black ('b) or white ('w)
+;
+;Returns: a list of available moves from the current board state
+;------------------------------------------------------------------------------
 (defun board-generate (position placed_pos player)
 	(let (
 		(new_board (copy-list position)) 	; copy current board
@@ -307,7 +279,6 @@ Returns: a list of available moves from the current board state
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
 					(setf flipped_flag 1)
-					 ;;(print flip) 
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -321,7 +292,6 @@ Returns: a list of available moves from the current board state
 					(setf (nth flip new_board) player)
 					(setf flip (- flip check_dir) )
 					(setf flipped_flag 1)
-					;(print flip)
 					) ; end loop
 		) ;end if, (do nothing if not true)
 
@@ -412,22 +382,22 @@ Returns: a list of available moves from the current board state
 ) ;end board-generate
 
 
-#| ****************************************************************************
-Function: check-flip-pieces
-
-Author: Stephanie Athow
-
-Description: searches a direction checking if the placed piece will	cause 
-	opponent pieces to flip.
-
-Parameters: 
-	position: a list containing the current board state
-	start_pos: start location of recursion
-	player: the player making a move, will be black ('b) or white ('w)
-	dir: direction to move searching for valid move
-
-Returns: position of valid move or nil
-***************************************************************************** |# 
+;------------------------------------------------------------------------------
+;Function: check-flip-pieces
+;
+;Author: Stephanie Athow
+;
+;Description: searches a direction checking if the placed piece will	cause 
+;	opponent pieces to flip.
+;
+;Parameters: 
+;	position: a list containing the current board state
+;	start_pos: start location of recursion
+;	player: the player making a move, will be black ('b) or white ('w)
+;	dir: direction to move searching for valid move
+;
+;Returns: position of valid move or nil
+;------------------------------------------------------------------------------
 (defun check-flip-pieces (position start_pos player dir)
 	(let
 		((check_pos) (prev_pos) (check_wrap)) 		; position to check for flipping
@@ -451,8 +421,6 @@ Returns: position of valid move or nil
 		; 	piece of same color is found
 		(loop while( and (> check_pos -1) 	; check start of board
 					(< check_pos 64)	  	; check end of board
-;					(<= flip_count 7)		; check start of row
-;					(>= (mod check_pos 8) 0)	; check end of row
 					(/= (abs (- (mod check_pos 8) prev_pos)) 7)
 			  	    ) do ; end while conditions
 
@@ -471,29 +439,27 @@ Returns: position of valid move or nil
 
 			; increment while loop counter
 			(setf check_pos (+ check_pos dir) )
-			;(setf flip_count (+ flip_count 1))
 
 		) ; end while loop
 		start_flip
 	) ; end let
 ) ; end check-flip-pieces
 
-#| ****************************************************************************
-Function: validate-move
-
-Author: Stephanie Athow
-
-Description: validates and returns the board state after the user places their piece
-
-Parameters: 
-	Position: a list containing the current board state
-	user_pos: the position to place the current player's piece
-	player: the player making a move, will be black ('b) or white ('w)
-
-Returns: the board state after the user placed their piece or nil if it was 
-	and invalid move.
-
-***************************************************************************** |# 
+;------------------------------------------------------------------------------
+;Function: validate-move
+;
+;Author: Stephanie Athow
+;
+;Description: validates and returns the board state after the user places their piece
+;
+;Parameters: 
+;	Position: a list containing the current board state
+;	user_pos: the position to place the current player's piece
+;	player: the player making a move, will be black ('b) or white ('w)
+;
+;Returns: the board state after the user placed their piece or nil if it was 
+;	and invalid move.
+;------------------------------------------------------------------------------
 (defun validate-move (position user_pos player)
 	(let (
 		(new_board (copy-list position)) 	; copy current board
@@ -524,9 +490,4 @@ Returns: the board state after the user placed their piece or nil if it was
 
 	) ; end let
 ) ;end validate-move
-
-
-
-
-
 

@@ -222,7 +222,6 @@
 			)
 		)
 
-
 		(setf successors (list* left right up down up-left up-right down-left down-right successors) )
 		(setf successors (remove nil successors))
 
@@ -376,7 +375,6 @@
 	(if (not flipped_flag)
 		(setf (nth placed_pos new_board) '-)
 	)
-
 	new_board
 	); end let
 ) ;end board-generate

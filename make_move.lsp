@@ -11,14 +11,19 @@
 ; Return:       none
 ;------------------------------------------------------------------------------
 (defun make-move (boardState player ply)
-
+	(format t "DUDE~%")
 	(let (movedBoard) 
 		; Set the board to the next step indicated by minimax
-		(setf movedBoard 
-			(car (nth 1 (minimax *gameBoard* ply '0 player 'MAX -1000000 1000000) ) ) )
+		(format t "Minimax: ~s~%" (minimax boardState ply '0 player 'MAX -1000000 1000000))
 
+		(setf movedBoard 
+			(car (nth 1 (minimax boardState ply '0 player 'MAX -1000000 1000000) ) ) )
+
+		(format t "Before: ~s~%" boardState)
+		(format t "After:  ~s~%" movedBoard)
+		(format t "Player ~s: ~s move~%" player (newboard-to-move boardState movedBoard))
 		; Convert the new game board to a row/col position to move
-		(newboard-to-move *gameBoard* movedBoard)
+		(newboard-to-move boardState movedBoard)
 	)
 )
 
@@ -41,9 +46,9 @@
 	(let (
 			c1 
 			c2 
-			row
-			col
-			(movedIndex 0)
+			(row 'NIL)
+			(col 'NIL)
+			(movedIndex -1)
 		)
 		; For each element in the puzzles
 		(dotimes (i 64)
@@ -60,18 +65,27 @@
 
 		)
 
-		; Convert the index to column and row
-		(setf col  (mod movedIndex 8))
+		(cond 
+			((= movedIndex -1)
+				(return-from newboard-to-move 'NIL)
+			)
+
+			(t
+				; Convert the index to column and row
+				(setf col  (mod movedIndex 8))
+				
+				; Compute 1 based row
+				(setf row
+					(1+ (/ (- movedIndex col) 8))
+				)
+
+				; Convert the column to 1 based index
+				(incf col)
+
+				(list row col)
+			)
 		
-		; Compute 1 based row
-		(setf row
-			(1+ (/ (- movedIndex col) 8))
 		)
-
-		; Convert the column to 1 based index
-		(incf col)
-
-		(list row col)
 	)
 )
 ;------------------------------------------------------------------------------

@@ -11,17 +11,11 @@
 ; Return:       none
 ;------------------------------------------------------------------------------
 (defun make-move (boardState player ply)
-;	(format t "DUDE~%")
 	(let (movedBoard) 
 		; Set the board to the next step indicated by minimax
-;		(format t "Minimax: ~s~%" (minimax boardState ply '0 player 'MAX -1000000 1000000))
-
 		(setf movedBoard 
 			(car (nth 1 (minimax boardState ply '0 player 'MAX -1000000 1000000) ) ) )
 
-;		(format t "Before: ~s~%" boardState)
-;		(format t "After:  ~s~%" movedBoard)
-;		(format t "Player ~s: ~s move~%" player (newboard-to-move boardState movedBoard))
 		; Convert the new game board to a row/col position to move
 		(newboard-to-move boardState movedBoard) 
 	)
@@ -109,10 +103,6 @@
 			(and 
 				(equal c1 '-)
 				(not (equal c2 '-))
-;				(or 
-;					(equal c2 'b)
-;					(equal c2 'w)
-;				)
 			)
 			't
 		)

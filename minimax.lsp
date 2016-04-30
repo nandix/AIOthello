@@ -33,11 +33,6 @@
 ;          applies the static evaluation function to the position.
 ;------------------------------------------------------------------------------
 (defun minimax (position ply curr_depth player mm_player alpha beta)
-
-;    (format t "Made it to minimax~%")
-;    (format t "Pos: ~S~%" position)
-;    (format t "Player ~s~%" player)
-;    (format t "Move gen: ~s~%" (move-generator position player))
     ; if we have searched deep enough, or there are no successors,
     ; return position evaluation and nil for the path
     (if (or (deep-enough ply curr_depth) (null (move-generator position player)))
@@ -62,12 +57,8 @@
 
             (if (equal mm_player 'MAX) (setf best-score -1000000) (setf best-score 1000000) )
 
-;            (format t "Position: ~s~%" position)
- ;           (format t "Player: ~s~%" player)
-  ;          (format t "SUCCESSORS: ~s~%" successors)
             ; explore possible moves by looping through successor positions
             (dolist (successor successors)
-;                (format "SUCC")
 
                 ; Decide if we need to make a recursive call, or employ alpha beta pruning
                 (cond 

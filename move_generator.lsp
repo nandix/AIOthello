@@ -45,10 +45,6 @@
 		; termination condition - all positions have been checked
 		((= play_pos 64) successors)
 
-;(format t "Move gen board: ~S~%" position)
-;(format t "Move gen player: ~s~%" player)		
-;(format t "Play pos: ~s~%" play_pos)
-
 		; set oppenent color
 ;		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
@@ -56,9 +52,6 @@
 			; hit own color - do nothing & move on
 			; hit wall - do nothing & move on
 			; hit empty space - place move & flip pieces
-
-;(format t "player: ~s~%" player )
-;(format t "oppose: ~s~%" oppose)
 
 		; check left
 		(setf check_pos (- play_pos 1) )
@@ -72,7 +65,6 @@
 			(loop while (/= (mod check_pos 8) 7) do
 				(when (equal (nth check_pos position) '-) 
 					(setf left (board-generate position check_pos player)) 
-;					(format t "Left ~%")
 					(return)
 				)
 				; if player piece has been encountered, stop looking

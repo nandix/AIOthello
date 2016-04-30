@@ -33,7 +33,6 @@
 ;          applies the static evaluation function to the position.
 ;------------------------------------------------------------------------------
 (defun minimax (position ply curr_depth player mm_player alpha beta)
-
     ; if we have searched deep enough, or there are no successors,
     ; return position evaluation and nil for the path
     (if (or (deep-enough ply curr_depth) (null (move-generator position player)))
@@ -93,6 +92,7 @@
                 ) ;end cond recursion call
             ) ;end do list
 
+;            (format t "Path: ~s~%" best-path)
             ; return (value path) list when done
             (list best-score best-path)
         )

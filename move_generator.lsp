@@ -46,7 +46,7 @@
 		((= play_pos 64) successors)
 
 		; set oppenent color
-		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
+;		(if (equal player 'B) (setf oppose 'W) (setf oppose 'B) )
 
 		; perform check and traverse until:
 			; hit own color - do nothing & move on
@@ -57,7 +57,8 @@
 		(setf check_pos (- play_pos 1) )
 		(when (and (> play_pos 0)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose)
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
 			(> (mod play_pos 8) 0) )
 
 			; search for edge of board or until blank space has been found
@@ -78,7 +79,8 @@
 		(setf check_pos (+ play_pos 1) )
 		(when (and (< play_pos 63)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose)
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
 			(< (mod play_pos 8) 7) )
 
 			; search for edge of board or until blank space has been found
@@ -99,7 +101,9 @@
 		(setf check_pos (- play_pos 8) )
 		(when (and (> play_pos 7)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while (> check_pos -1) do
@@ -120,7 +124,9 @@
 		(setf check_pos (+ play_pos 8) )
 		(when (and (< play_pos 56)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while (< check_pos 64) do
@@ -142,7 +148,9 @@
 		(when (and (> play_pos 8) 
 			(> (mod play_pos 8) 0) 
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while ( and  (> check_pos -1) (/= (mod check_pos 8) 7)) do
@@ -163,7 +171,9 @@
 		(when (and (> play_pos 8) 
 			(< (mod play_pos 8) 8) 
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while ( and (> check_pos 0) (/= (mod check_pos 8) 0)) do
@@ -184,7 +194,9 @@
 		(when (and (< play_pos 56)
 			(> (mod play_pos 8) 0)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while ( and (< check_pos 63) (/= (mod check_pos 8) 7)) do
@@ -205,7 +217,9 @@
 		(when (and (< play_pos 55)
 			(< (mod play_pos 8) 8)
 			(equal (nth play_pos position) player)
-			(equal (nth check_pos position) oppose) )
+			(not (equal (nth check_pos position) player))
+			(not (equal (nth check_pos position) '-))
+			)
 
 			; search for edge of board or until blank space has been found
 			(loop while ( and (< check_pos 64) (/= (mod check_pos 8) 0)) do
@@ -221,7 +235,6 @@
 				(setf check_pos (+ check_pos 9) ) 
 			)
 		)
-
 
 		(setf successors (list* left right up down up-left up-right down-left down-right successors) )
 		(setf successors (remove nil successors))
@@ -376,7 +389,6 @@
 	(if (not flipped_flag)
 		(setf (nth placed_pos new_board) '-)
 	)
-
 	new_board
 	); end let
 ) ;end board-generate

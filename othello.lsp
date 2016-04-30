@@ -3,6 +3,10 @@
 ;
 ; Authors:      Steph Athow, Daniel Nix
 ;
+; Course: 	Artificial Intellegence
+;
+; Professor: Dr. Weiss
+;
 ; Description:  (From Specificaiton Document) Othello (also known as Reversi) 
 ;			is played on an 8x8 grid with 64 stones that are black on one
 ;			side and white on the other. 
@@ -249,19 +253,8 @@
 			- - - - - - - - ))
 
 
-	; To start the game, set the first player's color depending on if Player 1
-	;	wanted to move first or second
-	(cond 
-		((equal *firstMove* 't)
-			(setf *curColor* *playerColor*)
-		)
-		(t
-			(if (equal *playerColor* 'b)
-				(setf *curColor* 'w)
-				(setf *curColor* 'b)
-			)
-		)
-	)
+	; To start the game, set the first player to black
+	(setf *curColor* 'b)
 	
 )
 
@@ -512,9 +505,9 @@
 
 ; If run from the command line, start it here!
 ;If the user supplied a cmdline argument, call 8puzzle with that argument
-(cond
-	( (> (length *args*) 0)
-		(othello  (car *args*))
-	)
-)
+; (cond
+; 	( (> (length *args*) 0)
+; 		(othello  (car *args*))
+; 	)
+; )
 

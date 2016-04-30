@@ -11,14 +11,13 @@
 ; Return:       none
 ;------------------------------------------------------------------------------
 (defun make-move (boardState player ply)
-
 	(let (movedBoard) 
 		; Set the board to the next step indicated by minimax
 		(setf movedBoard 
-			(car (nth 1 (minimax *gameBoard* ply '0 player 'MAX -1000000 1000000) ) ) )
+			(car (nth 1 (minimax boardState ply '0 player 'MAX -1000000 1000000) ) ) )
 
 		; Convert the new game board to a row/col position to move
-		(newboard-to-move *gameBoard* movedBoard)
+		(newboard-to-move boardState movedBoard) 
 	)
 )
 
@@ -41,9 +40,9 @@
 	(let (
 			c1 
 			c2 
-			row
-			col
-			(movedIndex 0)
+			(row 'NIL)
+			(col 'NIL)
+			(movedIndex -1)
 		)
 		; For each element in the puzzles
 		(dotimes (i 64)
@@ -60,18 +59,27 @@
 
 		)
 
-		; Convert the index to column and row
-		(setf col  (mod movedIndex 8))
+		(cond 
+			((= movedIndex -1)
+				(return-from newboard-to-move 'NIL)
+			)
+
+			(t
+				; Convert the index to column and row
+				(setf col  (mod movedIndex 8))
+				
+				; Compute 1 based row
+				(setf row
+					(1+ (/ (- movedIndex col) 8))
+				)
+
+				; Convert the column to 1 based index
+				(incf col)
+
+				(list row col)
+			)
 		
-		; Compute 1 based row
-		(setf row
-			(1+ (/ (- movedIndex col) 8))
 		)
-
-		; Convert the column to 1 based index
-		(incf col)
-
-		(list row col)
 	)
 )
 ;------------------------------------------------------------------------------
@@ -94,10 +102,7 @@
 			;	new board holds a piece, return true. Otherwise return false
 			(and 
 				(equal c1 '-)
-				(or 
-					(equal c2 'b)
-					(equal c2 'w)
-				)
+				(not (equal c2 '-))
 			)
 			't
 		)
